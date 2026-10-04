@@ -1,0 +1,297 @@
+/* ==UserStyle==
+ * @name         Zen Look
+ * @description  Zen/Arc-style vertical tabbar: soft rounded tabs without outlines, pinned tabs
+ *               as a 3-column tile grid, muted inactive titles. Pairs with CollapseTabbar.css.
+ * @version      2026.10.4
+ * ==/UserStyle==
+ */
+
+:root {
+  --zen-radius: 10px;
+  --zen-hover: rgba(255, 255, 255, 0.07);
+  --zen-active: rgba(255, 255, 255, 0.16);
+  --zen-stack: rgba(255, 255, 255, 0.05);
+  --zen-tile: rgba(255, 255, 255, 0.08);
+  --zen-tile-active: rgba(255, 255, 255, 0.2);
+  --zen-fg-dim: rgba(255, 255, 255, 0.7);
+  --zen-line: rgba(255, 255, 255, 0.08);
+  --zen-pin-h: 40px;   /* pinned tile height */
+  --zen-pin-gap: 6px;
+  --zen-inset: 8px;    /* breathing room between tabs and the tabbar edges */
+  --zen-indent: 12px;  /* accordion children indent */
+}
+
+/* ── Tabs: soft pills, no outlines ── */
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .tab {
+  border-radius: var(--zen-radius) !important;
+  background-color: transparent;
+  background-image: none !important;   /* incl. the pinned-tab corner fold */
+  box-shadow: none !important;
+  transition: background-color 120ms ease;
+}
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .tab:not(.active):hover {
+  background-color: var(--zen-hover) !important;
+}
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .tab.active {
+  background-color: var(--zen-active) !important;
+  color: #fff !important;
+}
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .tab .title {
+  font-size: 13px;
+}
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .tab:not(.active) .title {
+  color: var(--zen-fg-dim);
+}
+
+/* Breathing room: shrink the tab box itself (never add margin/padding to Vivaldi-sized boxes,
+   that widens the column). The stack frame lives inside .tab-wrapper, so it follows. */
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .tab-strip .tab-wrapper {
+  width: calc(100% - 2 * var(--zen-inset)) !important;
+  margin-left: var(--zen-inset) !important;
+}
+
+/* Stacks: replace the thick white frame with a faint fill */
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .svg-tab-stack .stack-frame {
+  stroke: none !important;
+  fill: var(--zen-stack) !important;
+  rx: var(--zen-radius);
+  ry: var(--zen-radius);
+}
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .stack-counter {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: none !important;
+  border-radius: 6px !important;
+  color: var(--zen-fg-dim) !important;
+}
+
+/* ── Pinned tabs: 3-column tile grid (needs vivaldi://flags/#vivaldi-horizontal-pinned-tabs) ── */
+#tabs-tabbar-container:not(.narrow) .pinned-group {
+  /* no margin/border: Vivaldi sets an inline full width, extra box size would widen the column */
+  box-shadow: inset 0 -1px 0 var(--zen-line);
+}
+#tabs-tabbar-container:not(.narrow) .pinned-group .tab-position {
+  width: calc((100% - 2 * var(--zen-inset) - 2 * var(--zen-pin-gap)) / 3) !important;
+  height: var(--zen-pin-h) !important;
+}
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container #tabs-container .pinned-group .tab-wrapper,
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container #tabs-container .pinned-group .tab {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+}
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container #tabs-container .pinned-group .tab {
+  background-color: var(--zen-tile);
+}
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container #tabs-container .pinned-group .tab.active {
+  background-color: var(--zen-tile-active) !important;
+}
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container #tabs-container .pinned-group .tab-header {
+  justify-content: center;
+  padding: 0 !important;
+}
+
+/* Grid placement (Vivaldi positions tiles with transform; percentages = tile width) */
+#tabs-tabbar-container:not(.narrow) .pinned-group .tab-position { left: var(--zen-inset) !important; }
+#tabs-tabbar-container:not(.narrow) .pinned-group > :nth-child(1) > .tab-position { transform: translate(calc(0 * (100% + var(--zen-pin-gap))), calc(0 * (var(--zen-pin-h) + var(--zen-pin-gap)))) !important; }
+#tabs-tabbar-container:not(.narrow) .pinned-group > :nth-child(2) > .tab-position { transform: translate(calc(1 * (100% + var(--zen-pin-gap))), calc(0 * (var(--zen-pin-h) + var(--zen-pin-gap)))) !important; }
+#tabs-tabbar-container:not(.narrow) .pinned-group > :nth-child(3) > .tab-position { transform: translate(calc(2 * (100% + var(--zen-pin-gap))), calc(0 * (var(--zen-pin-h) + var(--zen-pin-gap)))) !important; }
+#tabs-tabbar-container:not(.narrow) .pinned-group > :nth-child(4) > .tab-position { transform: translate(calc(0 * (100% + var(--zen-pin-gap))), calc(1 * (var(--zen-pin-h) + var(--zen-pin-gap)))) !important; }
+#tabs-tabbar-container:not(.narrow) .pinned-group > :nth-child(5) > .tab-position { transform: translate(calc(1 * (100% + var(--zen-pin-gap))), calc(1 * (var(--zen-pin-h) + var(--zen-pin-gap)))) !important; }
+#tabs-tabbar-container:not(.narrow) .pinned-group > :nth-child(6) > .tab-position { transform: translate(calc(2 * (100% + var(--zen-pin-gap))), calc(1 * (var(--zen-pin-h) + var(--zen-pin-gap)))) !important; }
+#tabs-tabbar-container:not(.narrow) .pinned-group > :nth-child(7) > .tab-position { transform: translate(calc(0 * (100% + var(--zen-pin-gap))), calc(2 * (var(--zen-pin-h) + var(--zen-pin-gap)))) !important; }
+#tabs-tabbar-container:not(.narrow) .pinned-group > :nth-child(8) > .tab-position { transform: translate(calc(1 * (100% + var(--zen-pin-gap))), calc(2 * (var(--zen-pin-h) + var(--zen-pin-gap)))) !important; }
+#tabs-tabbar-container:not(.narrow) .pinned-group > :nth-child(9) > .tab-position { transform: translate(calc(2 * (100% + var(--zen-pin-gap))), calc(2 * (var(--zen-pin-h) + var(--zen-pin-gap)))) !important; }
+#tabs-tabbar-container:not(.narrow) .pinned-group > :nth-child(10) > .tab-position { transform: translate(calc(0 * (100% + var(--zen-pin-gap))), calc(3 * (var(--zen-pin-h) + var(--zen-pin-gap)))) !important; }
+#tabs-tabbar-container:not(.narrow) .pinned-group > :nth-child(11) > .tab-position { transform: translate(calc(1 * (100% + var(--zen-pin-gap))), calc(3 * (var(--zen-pin-h) + var(--zen-pin-gap)))) !important; }
+#tabs-tabbar-container:not(.narrow) .pinned-group > :nth-child(12) > .tab-position { transform: translate(calc(2 * (100% + var(--zen-pin-gap))), calc(3 * (var(--zen-pin-h) + var(--zen-pin-gap)))) !important; }
+#tabs-tabbar-container:not(.narrow) .pinned-group:has(> :nth-child(1):last-child, > :nth-child(2):last-child, > :nth-child(3):last-child) { height: calc(1 * (var(--zen-pin-h) + var(--zen-pin-gap)) + 4px) !important; }
+#tabs-tabbar-container:not(.narrow) .pinned-group:has(> :nth-child(4):last-child, > :nth-child(5):last-child, > :nth-child(6):last-child) { height: calc(2 * (var(--zen-pin-h) + var(--zen-pin-gap)) + 4px) !important; }
+#tabs-tabbar-container:not(.narrow) .pinned-group:has(> :nth-child(7):last-child, > :nth-child(8):last-child, > :nth-child(9):last-child) { height: calc(3 * (var(--zen-pin-h) + var(--zen-pin-gap)) + 4px) !important; }
+#tabs-tabbar-container:not(.narrow) .pinned-group:has(> :nth-child(10):last-child, > :nth-child(11):last-child, > :nth-child(12):last-child) { height: calc(4 * (var(--zen-pin-h) + var(--zen-pin-gap)) + 4px) !important; }
+
+/* ── Accordion stacking (Settings > Tabs > Tab Stacking > Accordion) ── */
+/* Children: indented pills (shrink the box, never add margin to Vivaldi-sized boxes) */
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .tab-strip .tab-wrapper:has(> .tab.tab-in-accordion) {
+  width: calc(100% - 2 * var(--zen-inset) - var(--zen-indent)) !important;
+  margin-left: calc(var(--zen-inset) + var(--zen-indent)) !important;
+}
+/* Closed stack header reads as a group title (clicking anywhere on it opens the stack) */
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .tab.tab-accordion .title {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* Everything below needs StackNames.js (it sets html[data-shine-stacks]); without it the
+   stacks fall back to Vivaldi's own accordion layout instead of overlapping. */
+/* Dia-style group header: move Vivaldi's arrow row from below a stack to above it.
+   CSS `translate` adds to Vivaldi's own transform positioning, so no relayout happens:
+   the stack's rows move down by one arrow row, the arrow row moves up by N tab rows. */
+html[data-shine-stacks] #tabs-tabbar-container {
+  --zen-row: 33px;        /* Vivaldi tab row height (compact density) */
+  --zen-arrow-row: 19px;  /* Vivaldi accordion arrow row height */
+  --zen-hdr-extra: 10px;  /* extra height given to each stack header (breathing room) */
+  --zen-group-gap: 6px;   /* space below each stack */
+  --zen-per-group: calc(var(--zen-hdr-extra) + var(--zen-group-gap));
+}
+/* StackNames.js annotates rows: data-zen-g = stack headers above the row, data-zen-n = rows
+   in the stack (on its first row). Every stack above a row adds (header extra + gap), so each
+   row moves down by g times that; a stack's own rows also move below their moved-up header. */
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > [data-zen-g] { --zen-g: attr(data-zen-g type(<number>), 0); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > [data-zen-n] { --zen-n: attr(data-zen-n type(<number>), 1); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span > .tab-position {
+  translate: 0 calc(var(--zen-g, 0) * var(--zen-per-group));
+}
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span > .tab-position:has(.tab.tab-in-accordion, .tab.tab-accordion) {
+  translate: 0 calc(var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) + var(--zen-arrow-row));
+}
+/* The stack frame lives in the first row: pull it up so it also wraps the header row, and
+   (for an open stack, whose first row is indented) back out to the same edges as the header. */
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip .tab-wrapper:is(:has(> .tab.tab-accordion), :has(> .tab.tab-first-in-group)) > .svg-tab-stack {
+  /* from 2px below the header's top to 4px below the last tab pill */
+  height: calc(var(--zen-n, 1) * var(--zen-row) + var(--zen-hdr-extra) + 18px) !important;
+}
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip .tab-wrapper:has(> .tab.tab-accordion) > .svg-tab-stack {
+  translate: 0 calc(2px - var(--zen-hdr-extra) - var(--zen-arrow-row));
+}
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip .tab-wrapper:has(> .tab.tab-first-in-group) > .svg-tab-stack {
+  translate: calc(-1 * var(--zen-indent)) calc(2px - var(--zen-hdr-extra) - var(--zen-arrow-row));
+  width: calc(100% + var(--zen-indent)) !important;
+  max-width: none !important;  /* Vivaldi caps it at 100% */
+}
+html[data-shine-stacks] #browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .accordion-toggle-arrow {
+  width: calc(100% - 2 * var(--zen-inset)) !important;
+  margin-left: var(--zen-inset);
+  padding-left: 10px !important;
+  justify-content: flex-start !important;
+  align-items: center;
+  cursor: pointer;
+  background: transparent !important;  /* no accent bar on the active stack, no hover slab */
+  box-shadow: none !important;
+}
+/* Stack name next to the chevron (data-stack-name is set by StackNames.js) */
+html[data-shine-stacks] #browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .accordion-toggle-arrow::after {
+  content: attr(data-stack-name);
+  position: static !important;
+  display: block !important;
+  inset: auto !important;
+  width: auto !important;
+  height: auto !important;
+  background: none !important;
+  margin-left: 7px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--zen-fg-dim);
+  opacity: 0.85;
+  transition: opacity 120ms ease;
+}
+html[data-shine-stacks] #browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .accordion-toggle-arrow:hover::after {
+  opacity: 1;
+}
+html[data-shine-stacks] #browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .accordion-toggle-arrow .VivaldiSvgIcon {
+  opacity: 0.55;
+  transition: opacity 120ms ease, rotate 150ms ease;
+}
+html[data-shine-stacks] #browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .accordion-toggle-arrow:hover .VivaldiSvgIcon {
+  opacity: 1;
+}
+/* Stack colours (right-click a stack > Edit Stack): Vivaldi tags the rows with .colored and
+   --stackColorBg/Fg. Keep it soft: a light tint of the block, the colour on name + chevron. */
+html[data-shine-stacks] #browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .tab-position.colored .svg-tab-stack .stack-frame {
+  fill: color-mix(in srgb, var(--stackColorBg) 20%, transparent) !important;
+}
+html[data-shine-stacks] #browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .accordion-toggle-arrow.colored::after,
+html[data-shine-stacks] #browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .accordion-toggle-arrow.colored .VivaldiSvgIcon {
+  color: color-mix(in srgb, var(--stackColorBg) 70%, #fff) !important;
+  fill: currentColor;
+}
+html[data-shine-stacks] #browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .tab-position.colored .stack-counter {
+  background: color-mix(in srgb, var(--stackColorBg) 30%, transparent) !important;
+  color: #fff !important;
+}
+
+/* chevron: right when closed, down when open (Vivaldi draws "down" when closed, "up" when open) */
+html[data-shine-stacks] #tabs-tabbar-container .accordion-toggle-arrow.closed .VivaldiSvgIcon { rotate: -90deg; }
+html[data-shine-stacks] #tabs-tabbar-container .accordion-toggle-arrow.expanded .VivaldiSvgIcon { rotate: 180deg; }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + .accordion-toggle-arrow { translate: 0 calc(-1 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-2 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-3 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-4 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-5 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-6 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-7 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-8 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-9 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-10 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-11 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-12 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-13 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-14 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-15 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-16 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-17 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-18 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-19 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-20 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-21 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-22 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-23 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-24 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-25 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-26 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-27 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-28 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-29 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-30 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-31 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-32 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-33 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-34 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-35 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-36 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-37 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-38 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-39 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-first-in-group, .tab.tab-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + span:has(.tab.tab-in-accordion) + .accordion-toggle-arrow { translate: 0 calc(-40 * var(--zen-row) + var(--zen-g, 0) * var(--zen-per-group) + var(--zen-hdr-extra) / 2 + 1px); }
+
+/* ── New Tab row: always visible at the bottom (Vivaldi squeezes this toolbar to ~6px when the
+   list is long, and the media player box then covers it). The tab list scrolls instead. ── */
+#browser:is(.tabs-left, .tabs-right) #tabs-container > .toolbar-tabbar-after {
+  flex: 0 0 auto !important;  /* Vivaldi: 1 0 0% = zero base height, only gets leftover space */
+  min-height: 42px !important;  /* its content does not size it (Vivaldi toolbar internals) */
+  padding: 4px var(--zen-inset) 6px !important;
+}
+#browser:is(.tabs-left, .tabs-right) #tabs-container > .toolbar-tabbar-after .button-toolbar.newtab {
+  flex: 1 1 auto;
+}
+#browser:is(.tabs-left, .tabs-right) #tabs-container > .toolbar-tabbar-after .button-toolbar.newtab > button {
+  width: 100%;
+  height: 32px;
+  justify-content: flex-start;
+  gap: 8px;
+  padding-left: 10px;
+  border-radius: var(--zen-radius);
+  color: var(--zen-fg-dim);
+  transition: background-color 120ms ease, color 120ms ease;
+}
+#browser:is(.tabs-left, .tabs-right) #tabs-container > .toolbar-tabbar-after .button-toolbar.newtab > button:hover {
+  background-color: var(--zen-hover) !important;
+  color: #fff;
+}
+#browser:is(.tabs-left, .tabs-right) #tabs-container > .toolbar-tabbar-after .button-toolbar.newtab > button::after {
+  content: "New Tab";
+  font-size: 13px;
+}
+#browser:is(.tabs-left, .tabs-right) #tabs-container > .toolbar-tabbar-after .button-toolbar.newtab > button > .button-icon {
+  flex: 0 0 auto !important;
+  width: auto !important;  /* Vivaldi stretches it over the whole button */
+}
+/* Let the tab list use all the height left (Vivaldi caps .resize with an inline max-height that
+   doesn't know about mod boxes like the media player, leaving a gap when the player closes) */
+#browser:is(.tabs-left, .tabs-right) #tabs-container > .resize {
+  max-height: none !important;
+}

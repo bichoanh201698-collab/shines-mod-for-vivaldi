@@ -1,0 +1,17 @@
+/* Shine's mod for Vivaldi — CSS entry point.
+   Order matters: ZenLook.css must come before CollapseTabbar.css. */
+
+@import "mods/VividToast.css";
+@import "mods/BetterAnimation.css";
+@import "mods/VividPeek.css";
+@import "mods/VividQC.css";
+@import "mods/RemoveClutter.css";
+@import "mods/Quietify.css";
+@import "mods/ZenLook.css";
+@import "mods/CollapseTabbar.css";
+@import "mods/VividPlayer.css";
+@import "mods/PinnedTabRestore.css";
+@import "mods/DownloadPanel.css";
+@import "mods/Extensions.css";
+@import "mods/LineBreak.css";
+@import "mods/BtnHoverAnime.css";

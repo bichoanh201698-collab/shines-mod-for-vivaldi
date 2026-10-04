@@ -1,0 +1,236 @@
+/* ==UserStyle==
+ * @name         Collapse Tabbar
+ * @description  Vertical tabbar collapses to a favicon strip when the mouse leaves, and
+ *               expands as an overlay (no page reflow) on hover. Works with single-level
+ *               tabs and two-level tab stacking. Do not combine with PeekTabbar.css.
+ * @version      2026.10.4
+ * ==/UserStyle==
+ */
+
+/*
+ * Vivaldi measures .tabbar-wrapper / .resize to compute every tab's width, so this mod never
+ * changes the size of those. Instead:
+ *  - the tabbar is taken out of the layout flow (absolute, pinned to the window edge) and
+ *    the page only reserves the strip width, so the expanded tabbar overlays the page;
+ *  - clip-path hides everything except the strip (it also lets clicks through to the page);
+ *  - two-level: the first column already is a favicon column, the second one is hidden;
+ *  - single-level: each tab box shrinks to a favicon tile at the window edge.
+ */
+
+:root {
+  --ct-strip: 44px;          /* collapsed width */
+  --ct-tile: 40px;           /* collapsed single-level tab tile = Vivaldi's two-level tile */
+  --ct-speed: 140ms;
+  --ct-close-delay: 300ms;   /* wait before collapsing, avoids flicker */
+}
+
+/* With horizontal pinned tabs Vivaldi widens its two-level favicon column to 54px */
+#browser:has(#tabs-container .pinned-group) {
+  --ct-strip: 54px;
+}
+
+#browser:is(.tabs-left, .tabs-right) .inner {
+  position: relative;
+}
+
+#browser:is(.tabs-left, .tabs-right) .inner > .tabbar-wrapper {
+  position: absolute !important;
+  top: 0;
+  bottom: 0;
+  z-index: 20;
+  pointer-events: none; /* the wrapper box spans the expanded width; let clicks reach the page */
+}
+#browser:is(.tabs-left, .tabs-right) .inner > .tabbar-wrapper > * {
+  pointer-events: auto; /* clip-path already limits hit-testing to the visible strip */
+}
+#browser.tabs-right .inner > .tabbar-wrapper { right: 0; }
+
+/* Toolbar popups (Workspaces, Edit Tab Stack, extensions…) live in #browser > .button-popup
+   at z-index 10: keep them above the overlaid tabbar. While the Workspaces or stack editor
+   popup is open, the tabbar also stays expanded (see the :has(.WorkspacePopup…) selectors). */
+#browser > .button-popup {
+  z-index: 30 !important;
+}
+#browser.tabs-left .inner > .tabbar-wrapper { left: 0; }
+
+/* Reserve the strip for the page */
+#browser.tabs-right .inner > #webview-container { margin-right: var(--ct-strip); }
+#browser.tabs-left .inner > #webview-container { margin-left: var(--ct-strip); }
+
+/* Same background as the browser frame (blurred theme image, aligned to the window) */
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container {
+  background-color: var(--colorBg);
+  background-image: var(--browserBlurredImage, var(--browserBackgroundImage, none));
+  background-size: var(--browserBackgroundSize, cover);
+  background-position: var(--browserBackgroundPosition, center);
+  background-attachment: fixed;
+  transition: clip-path var(--ct-speed) ease-in var(--ct-close-delay),
+    box-shadow var(--ct-speed) ease-in var(--ct-close-delay);
+}
+
+/* ── Collapsed: only the strip next to the window edge is visible ── */
+#browser.tabs-right #tabs-tabbar-container {
+  clip-path: inset(0 0 0 calc(100% - var(--ct-strip)));
+}
+#browser.tabs-left #tabs-tabbar-container {
+  clip-path: inset(0 calc(100% - var(--ct-strip)) 0 0);
+}
+
+/* Two-level: hide the second column (its active tab would bleed into the strip) */
+#browser #tabs-subcontainer {
+  transition: visibility 0s linear calc(var(--ct-close-delay) + var(--ct-speed));
+}
+#browser #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #tabs-subcontainer {
+  visibility: hidden;
+}
+
+/* First column (single-level, or a widened two-level first column): shrink every tab box
+   (tab + stack frame) to a favicon tile at the window edge */
+#browser #tabs-container .tab-strip .tab-wrapper {
+  transition: width var(--ct-speed) ease-in var(--ct-close-delay),
+    margin-left var(--ct-speed) ease-in var(--ct-close-delay);
+}
+#browser #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #tabs-container .tab-strip .tab-wrapper {
+  width: var(--ct-tile) !important;
+  overflow: hidden;
+}
+#browser.tabs-right #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #tabs-container .tab-strip .tab-wrapper {
+  margin-left: calc(100% - var(--ct-tile) - (var(--ct-strip) - var(--ct-tile)) / 2) !important;
+}
+#browser #tabs-container .tab :is(.title, .close, .stack-counter) {
+  transition: opacity var(--ct-speed) ease-in var(--ct-close-delay);
+}
+#browser #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #tabs-container .tab :is(.title, .close, .stack-counter) {
+  opacity: 0;
+}
+
+
+/* Horizontal pinned tabs (vivaldi://flags/#vivaldi-horizontal-pinned-tabs): when collapsed,
+   restack the pinned grid into one column at the window edge (tiles are 46px squares).
+   Not needed when Vivaldi's two-level first column is narrow (.narrow): it stacks them itself. */
+#browser #tabs-container .pinned-group {
+  transition: height var(--ct-speed) ease-in var(--ct-close-delay);
+}
+#browser #tabs-container .pinned-group .tab-position {
+  transition: transform var(--ct-speed) ease-in var(--ct-close-delay),
+    left var(--ct-speed) ease-in var(--ct-close-delay);
+}
+#browser.tabs-right #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group .tab-position {
+  left: calc(100% - var(--ct-strip) / 2 - 25px) !important;
+}
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group .tab-position {
+  width: 46px !important;  /* undo tile resizing from theme mods (e.g. ZenLook.css) */
+  height: 46px !important;
+}
+#browser #tabs-tabbar-container:is(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group {
+  transition: height var(--ct-speed) ease-out;
+}
+#browser #tabs-tabbar-container:is(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group .tab-position {
+  transition: transform var(--ct-speed) ease-out, left var(--ct-speed) ease-out;
+}
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group > :nth-child(1) > .tab-position { transform: translateY(0px) !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group > :nth-child(2) > .tab-position { transform: translateY(46px) !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group > :nth-child(3) > .tab-position { transform: translateY(92px) !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group > :nth-child(4) > .tab-position { transform: translateY(138px) !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group > :nth-child(5) > .tab-position { transform: translateY(184px) !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group > :nth-child(6) > .tab-position { transform: translateY(230px) !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group > :nth-child(7) > .tab-position { transform: translateY(276px) !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group > :nth-child(8) > .tab-position { transform: translateY(322px) !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group > :nth-child(9) > .tab-position { transform: translateY(368px) !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group > :nth-child(10) > .tab-position { transform: translateY(414px) !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group > :nth-child(11) > .tab-position { transform: translateY(460px) !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group > :nth-child(12) > .tab-position { transform: translateY(506px) !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group:has(> :nth-child(1):last-child) { height: 50px !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group:has(> :nth-child(2):last-child) { height: 96px !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group:has(> :nth-child(3):last-child) { height: 142px !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group:has(> :nth-child(4):last-child) { height: 188px !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group:has(> :nth-child(5):last-child) { height: 234px !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group:has(> :nth-child(6):last-child) { height: 280px !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group:has(> :nth-child(7):last-child) { height: 326px !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group:has(> :nth-child(8):last-child) { height: 372px !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group:has(> :nth-child(9):last-child) { height: 418px !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group:has(> :nth-child(10):last-child) { height: 464px !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group:has(> :nth-child(11):last-child) { height: 510px !important; }
+#browser #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group:has(> :nth-child(12):last-child) { height: 556px !important; }
+
+/* ── Hover (or stack editor open): reveal the whole tabbar over the page ── */
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container:is(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) {
+  clip-path: inset(0 -40px 0 -40px); /* negative inset keeps the shadow visible */
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.45);
+  transition: clip-path var(--ct-speed) ease-out, box-shadow var(--ct-speed) ease-out;
+}
+#browser #tabs-tabbar-container:is(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #tabs-subcontainer {
+  transition: visibility 0s;
+}
+#browser #tabs-tabbar-container:is(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #tabs-container .tab-strip .tab-wrapper {
+  transition: width var(--ct-speed) ease-out, margin-left var(--ct-speed) ease-out;
+}
+#browser #tabs-tabbar-container:is(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #tabs-container .tab :is(.title, .close, .stack-counter) {
+  transition: opacity var(--ct-speed) ease-out;
+}
+
+/* Accordion stacks (with ZenLook.css + StackNames.js): drop the header rows from the favicon
+   strip and close the gaps they leave — every row moves up by one header row per stack above it */
+#browser #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .accordion-toggle-arrow {
+  visibility: hidden;
+}
+html[data-shine-stacks] #browser #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .tab-strip > span > .tab-position {
+  translate: 0 calc(var(--zen-g, 0) * -1 * var(--zen-arrow-row, 19px)) !important;
+}
+html[data-shine-stacks] #browser #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .tab-strip .tab-wrapper > .svg-tab-stack {
+  translate: 0 0 !important;
+  width: 100% !important;
+  height: calc(var(--zen-n, 1) * var(--zen-row, 33px) - 3px) !important;
+}
+
+/* Collapsed: keep the New Tab "+" inside the visible strip (with ZenLook.css's New Tab row) */
+#browser.tabs-right #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #tabs-container > .toolbar-tabbar-after .button-toolbar.newtab > button {
+  justify-content: flex-end !important;
+  padding-right: calc(var(--ct-strip) / 2 - 17px) !important;
+}
+#browser #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #tabs-container > .toolbar-tabbar-after .button-toolbar.newtab > button::after {
+  display: none;
+}
+
+/* Collapsed: the media player box (VividPlayer.js) shrinks to its play/pause button, centred
+   in the strip. Switch only after the tabbar has finished collapsing (discrete transitions). */
+#browser #tabs-tabbar-container #vivid-player :is(.vivid-player-card, .vivid-player-controls-row, .vivid-player-left-controls, .vivid-player-right-controls, .vivid-player-prev, .vivid-player-next, .vivid-player-note-layer) {
+  transition-behavior: allow-discrete;
+  transition-property: display, background-color, border-color, box-shadow, padding;
+  transition-duration: 0s;
+}
+#browser #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #vivid-player :is(.vivid-player-card, .vivid-player-controls-row, .vivid-player-left-controls, .vivid-player-right-controls, .vivid-player-prev, .vivid-player-next, .vivid-player-note-layer) {
+  transition-delay: calc(var(--ct-close-delay) + var(--ct-speed));
+}
+#browser #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #vivid-player .vivid-player-card {
+  background: none !important;  /* the card paints a gradient (background-image) */
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+#browser #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #vivid-player :is(.vivid-player-left-controls, .vivid-player-right-controls, .vivid-player-prev, .vivid-player-next, .vivid-player-note-layer) {
+  display: none !important;
+}
+#browser.tabs-right #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #vivid-player .vivid-player-controls-row {
+  grid-template-columns: 1fr !important;  /* it is a 3-column grid; the side columns are hidden */
+}
+#browser.tabs-right #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #vivid-player .vivid-player-center-controls {
+  justify-content: flex-end !important;
+}
+
+/* ── Left tabbar: the strip is the left edge, so content that hugs the left must stay compact ── */
+#browser.tabs-left #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #vivid-player .vivid-player-center-controls {
+  justify-content: flex-start !important;
+}
+#browser.tabs-left #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #tabs-container > .toolbar-tabbar-after .button-toolbar.newtab > button {
+  padding-left: calc(var(--ct-strip) / 2 - 22px) !important;
+}
+/* toolbar button labels (e.g. "Workspaces") would peek into the strip */
+#browser #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #tabs-container > .toolbar-tabbar-before :is(.button-title, .button-toolbar-menu-indicator) {
+  visibility: hidden;
+}
+#browser.tabs-left #tabs-tabbar-container:not(:hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) #tabs-container .tab-strip .tab-wrapper {
+  margin-left: calc((var(--ct-strip) - var(--ct-tile)) / 2) !important;  /* also drops the accordion indent */
+}
+#browser.tabs-left #tabs-tabbar-container:not(.narrow, :hover, :has(.StackEditor), #browser:has(.WorkspacePopup, .StackEditor-Modal, .StackEditor) *) .pinned-group .tab-position {
+  left: calc((var(--ct-strip) - 46px) / 2) !important;
+}
