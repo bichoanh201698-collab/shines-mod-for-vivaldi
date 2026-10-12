@@ -115,6 +115,45 @@
     scheduleNames();
   }
 
+  // ── Edit button: the pencil drawn by ZenLook.css at the right end of a stack header opens
+  //    Vivaldi's "Edit Stack" popup (name + colour) directly, open or closed stack alike.
+  const EDIT_ZONE = 28; // px from the header's right edge
+
+  function inEditZone(e) {
+    const toggle = e.target.closest?.(`${STRIP} > .accordion-toggle-arrow`);
+    if (!toggle || e.button !== 0) return null;
+    return e.clientX >= toggle.getBoundingClientRect().right - EDIT_ZONE ? toggle : null;
+  }
+
+  // Same call as the context menu's "Edit Stack" (setAwaitingEdit(groupId, inPopup)), reached
+  // through the stack row's React props.
+  function openStackEditor(toggle) {
+    const wrapper = firstMember(toggle)?.querySelector(".tab-wrapper");
+    const key = wrapper && Object.keys(wrapper).find((k) => k.startsWith("__reactFiber$"));
+    for (let f = key && wrapper[key], d = 0; f && d < 30; f = f.return, d++) {
+      const p = f.memoizedProps;
+      if (p && typeof p.setAwaitingEdit === "function" && p.groupId) {
+        p.setAwaitingEdit(p.groupId, true);
+        return;
+      }
+    }
+    console.warn("[StackNames] could not open the stack editor");
+  }
+
+  function swallow(e) {
+    if (!inEditZone(e)) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  function onEditClick(e) {
+    const toggle = inEditZone(e);
+    if (!toggle) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openStackEditor(toggle);
+  }
+
   function observe() {
     document.documentElement.setAttribute("data-shine-stacks", "");
     const container = document.querySelector("#tabs-tabbar-container");
@@ -132,5 +171,10 @@
     onChange();
   }
 
+  // (outside observe(): it retries itself until the tabbar exists)
+  for (const type of ["pointerdown", "mousedown", "pointerup", "mouseup"]) {
+    document.addEventListener(type, swallow, true);
+  }
+  document.addEventListener("click", onEditClick, true);
   observe();
 })();
