@@ -156,7 +156,7 @@ if ($vivRoot.StartsWith($env:LOCALAPPDATA, [StringComparison]::OrdinalIgnoreCase
   $every = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 5)
   $logon = New-ScheduledTaskTrigger -AtLogOn -User "$env:USERDOMAIN\$env:USERNAME"
   $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
-    -StartWhenAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 5)
+    -StartWhenAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 5) -Priority 10   # idle priority: never competes with games
   Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $every, $logon -Settings $settings `
     -Description "Re-applies Shine's mod after Vivaldi updates" -Force | Out-Null
   Say "Auto-repair after Vivaldi updates: on (task '$TaskName')"
