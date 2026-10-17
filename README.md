@@ -14,9 +14,14 @@ irm https://raw.githubusercontent.com/bichoanh201698-collab/shines-mod-for-vival
 
 Vivaldi is closed and restarted (tabs are restored).
 
-**After every Vivaldi update, run the same command again.** Vivaldi updates wipe the JS part;
-the CSS part lives in `%LOCALAPPDATA%\ShineMod` and survives, and without the JS the tab
-stacks simply fall back to Vivaldi's normal accordion look.
+**Vivaldi updates are handled automatically.** Updates wipe the JS part (the CSS lives in
+`%LOCALAPPDATA%\ShineMod` and survives). The installer sets up a scheduled task,
+*Shine's mod auto-repair*, that checks every 5 minutes and at logon, and puts the JS part back
+into a new Vivaldi version without closing Vivaldi. If Vivaldi has just restarted into the update,
+the task restarts it once more so the mod shows right away. The log is in
+`%LOCALAPPDATA%\ShineMod-files\auto-repair.log`. To skip the task, set `SHINE_NO_AUTO=1` before
+installing, and then rerun the install command yourself after each update. The task is only set
+up for per-user Vivaldi installs.
 
 Uninstall:
 
@@ -31,7 +36,9 @@ $env:SHINE_UNINSTALL = 1; irm https://raw.githubusercontent.com/bichoanh201698-c
 2. Copies the JS mods to `<Vivaldi>\Application\<version>\resources\vivaldi\user_mods\` and adds
    the loader (`injectMods.js`) to `window.html` (original kept as `window.html.shine-bak`).
 3. Enables `vivaldi://flags/#vivaldi-css-mods` and `#vivaldi-horizontal-pinned-tabs`.
-4. On first start, `ShineSetup.js` sets: tab bar on the right, tab stacking = Accordion,
+4. Saves a copy of the JS part plus `watch.ps1` to `%LOCALAPPDATA%\ShineMod-files` and registers
+   the auto-repair task (see above).
+5. On first start, `ShineSetup.js` sets: tab bar on the right, tab stacking = Accordion,
    tab bar width 300px. Change them freely afterwards (left side is supported too).
 
 ## The mods

@@ -10,11 +10,14 @@
   Options (environment variables):
     SHINE_YES=1        don't ask before closing Vivaldi
     SHINE_UNINSTALL=1  remove the mod
+    SHINE_NO_AUTO=1    don't set up the auto-repair task (re-applies the mod after Vivaldi updates)
 #>
 
 $ErrorActionPreference = 'Stop'
 $Repo      = 'bichoanh201698-collab/shines-mod-for-vivaldi'
 $ShineHome = Join-Path $env:LOCALAPPDATA 'ShineMod'      # survives Vivaldi updates
+$FilesHome = Join-Path $env:LOCALAPPDATA 'ShineMod-files' # copy of the JS part, for auto-repair
+$TaskName  = "Shine's mod auto-repair"
 $Marker    = '<script src="injectMods.js"></script>'
 
 function Say($msg, $color = 'Gray') { Write-Host "  $msg" -ForegroundColor $color }
@@ -102,6 +105,8 @@ if ($env:SHINE_UNINSTALL) {
   else { Write-Utf8 $html ((Read-Utf8 $html).Replace("`n  $Marker", '').Replace($Marker, '')) }
   foreach ($p in 'injectMods.js', 'user_mods') { $t = Join-Path $viv.Res $p; if (Test-Path $t) { Remove-Item $t -Recurse -Force } }
   if (Test-Path $ShineHome) { Remove-Item $ShineHome -Recurse -Force }
+  if (Test-Path $FilesHome) { Remove-Item $FilesHome -Recurse -Force }
+  Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
   Say 'Uninstalled. (Settings > Appearance > Custom UI Modifications can be cleared by hand.)' 'Green'
   Start-Process $viv.Exe
   return
@@ -136,6 +141,31 @@ Say "JS   -> $um"
 # 3) Flags: CSS mods + pinned tabs as a tile grid
 Enable-Flags (Join-Path $viv.UserData 'Local State') @('vivaldi-css-mods', 'vivaldi-horizontal-pinned-tabs')
 
+# 4) Auto-repair after Vivaldi updates (per-user installs only: the task runs without admin)
+$vivRoot = Split-Path $viv.Exe -Parent
+if ($vivRoot.StartsWith($env:LOCALAPPDATA, [StringComparison]::OrdinalIgnoreCase) -and -not $env:SHINE_NO_AUTO) {
+  if (Test-Path $FilesHome) { Remove-Item $FilesHome -Recurse -Force }
+  New-Item -ItemType Directory $FilesHome | Out-Null
+  Copy-Item $um (Join-Path $FilesHome 'user_mods') -Recurse -Force
+  Copy-Item (Join-Path $src 'injectMods.js') $FilesHome -Force
+  $watch = Join-Path $FilesHome 'watch.ps1'
+  Write-Utf8 $watch ((Read-Utf8 (Join-Path $src 'watch.ps1')).Replace('__VIVALDI_ROOT__', $vivRoot))
+  # conhost --headless: no console window flashing every few minutes
+  $action = New-ScheduledTaskAction -Execute 'conhost.exe' `
+    -Argument "--headless powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$watch`""
+  $every = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 5)
+  $logon = New-ScheduledTaskTrigger -AtLogOn -User "$env:USERDOMAIN\$env:USERNAME"
+  $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
+    -StartWhenAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 5)
+  Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $every, $logon -Settings $settings `
+    -Description "Re-applies Shine's mod after Vivaldi updates" -Force | Out-Null
+  Say "Auto-repair after Vivaldi updates: on (task '$TaskName')"
+}
+
 Start-Process $viv.Exe
 Write-Host "`n  Done! Vivaldi is restarting with Shine's mod." -ForegroundColor Green
-Say 'After a Vivaldi update, run the same command again to restore the JS part.'
+if (Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue) {
+  Say 'Vivaldi updates are handled automatically from now on.'
+} else {
+  Say 'After a Vivaldi update, run the same command again to restore the JS part.'
+}
