@@ -49,7 +49,7 @@ $env:SHINE_UNINSTALL = 1; irm https://raw.githubusercontent.com/bichoanh201698-c
 | `css/mods/ZenLook.css` | Minimal look: pills, spacing, pinned tile grid, accordion stack headers, stack colours, sticky "New Tab" row |
 | `js/StackNames.js` | Stack names on the headers (custom name or first tab's domain) + row data the CSS uses |
 | `js/ShineSetup.js` | One-time settings (see above) |
-| everything else | From [Awesome-Vivaldi / Volante](https://github.com/PaRr0tBoY/Awesome-Vivaldi) (media player, peek, toasts, …) |
+| everything else | From [Awesome-Vivaldi / Volante](https://github.com/PaRr0tBoY/Awesome-Vivaldi) (media player, toasts, …) |
 
 Tips: rename or recolour a stack by right-clicking its header tab while the stack is
 collapsed → *Edit Stack*. Tweak spacing with the variables at the top of `ZenLook.css`.
