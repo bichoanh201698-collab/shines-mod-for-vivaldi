@@ -48,6 +48,7 @@ $env:SHINE_UNINSTALL = 1; irm https://raw.githubusercontent.com/bichoanh201698-c
 | `css/mods/CollapseTabbar.css` | Tab bar collapses to a favicon strip, expands as an overlay on hover (left or right) |
 | `css/mods/ZenLook.css` | Minimal look: pills, spacing, pinned tile grid, accordion stack headers, stack colours, sticky "New Tab" row |
 | `js/StackNames.js` | Stack names on the headers (custom name or first tab's domain) + row data the CSS uses |
+| `js/TabScrollMemory.js` | Restores the expanded tab list scroll position after hover collapse; manual scrolling takes priority |
 | `js/ShineSetup.js` | One-time settings (see above) |
 | everything else | From [Awesome-Vivaldi / Volante](https://github.com/PaRr0tBoY/Awesome-Vivaldi) (media player, toasts, …) |
 
