@@ -2,7 +2,7 @@
  * @name         Zen Look
  * @description  Zen/Arc-style vertical tabbar: soft rounded tabs with a clear active outline, pinned tabs
  *               as a 3-column tile grid, muted inactive titles. Pairs with CollapseTabbar.css.
- * @version      2026.10.22
+ * @version      2026.10.31
  * ==/UserStyle==
  */
 
@@ -304,4 +304,11 @@ html[data-shine-stacks] #tabs-tabbar-container .tab-strip > span:has(.tab.tab-fi
    doesn't know about mod boxes like the media player, leaving a gap when the player closes) */
 #browser:is(.tabs-left, .tabs-right) #tabs-container > .resize {
   max-height: none !important;
+}
+
+/* Accordion spacing can overflow only after hover expands the bar, before Vivaldi
+   updates its .overflow class. Keep native wheel scrolling available in that state. */
+#browser:is(.tabs-left, .tabs-right) #tabs-tabbar-container .tab-strip {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
 }
